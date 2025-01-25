@@ -7,31 +7,56 @@ const buttons = document.querySelectorAll(".button");
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
     const value = button.textContent;
+    const operatorData = button.getAttribute("data-operator");
 
-    if ("0123456789".includes(value)) {
+    if (!operatorData) {
       currentInput += value;
       display.textContent = currentInput;
-    } else if ("+-*/".includes(value)) {
-      operator = value;
-      previousInput = currentInput;
-      currentInput = "";
-    } else if (value === "=") {
-      if (operator && previousInput) {
-        currentInput = eval(`${previousInput}${operator}${currentInput}`);
-        display.textContent = currentInput;
+    } else {
+      if ("+-*/".includes(operatorData)) {
+        if (currentInput) {
+          operator = operatorData;
+          previousInput = currentInput;
+          currentInput = "";
+          display.textContent = previousInput + " " + operator;
+        }
+      } else if (operatorData === "=") {
+        if (operator && previousInput && currentInput) {
+          const num1 = parseFloat(previousInput);
+          const num2 = parseFloat(currentInput);
+          let result;
+
+          switch (operator) {
+            case "+":
+              result = num1 + num2;
+              break;
+            case "-":
+              result = num1 - num2;
+              break;
+            case "*":
+              result = num1 * num2;
+              break;
+            case "/":
+              result = num2 !== 0 ? num1 / num2 : "Error";
+              break;
+          }
+
+          display.textContent = result;
+          currentInput = result.toString();
+          operator = "";
+          previousInput = "";
+        }
+      } else if (operatorData === "C") {
+        currentInput = "";
         operator = "";
         previousInput = "";
+        display.textContent = "0";
       }
-    } else if (value === "C") {
-      currentInput = "";
-      operator = "";
-      previousInput = "";
-      display.textContent = "0";
     }
   });
 });
 
-// dark mode
+// Dark mode toggle
 document.getElementById("darkModeToggle").addEventListener("click", function () {
   document.body.classList.toggle("dark-mode");
 
@@ -42,6 +67,7 @@ document.getElementById("darkModeToggle").addEventListener("click", function () 
   }
 });
 
+// save dark mode theme
 document.addEventListener("DOMContentLoaded", function () {
   const theme = localStorage.getItem("theme");
   if (theme === "dark") {
